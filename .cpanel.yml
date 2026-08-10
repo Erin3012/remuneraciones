@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/qlccl/qlccl/remuneraciones/
+    - /bin/cp -R app $DEPLOYPATH
+    - /bin/cp -R database $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R tests $DEPLOYPATH
+    - /bin/cp README.md $DEPLOYPATH
+    - /bin/cp .env.example $DEPLOYPATH
