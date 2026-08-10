@@ -1,0 +1,5 @@
+<?php
+require_once __DIR__.'/../app/PayrollCalculator.php';
+$p=['uf'=>34500,'minimum_wage'=>500000,'afp_cap_uf'=>81.6,'unemployment_cap_uf'=>122.4,'health_cap'=>166320,'mutual'=>.009,'sis'=>.0153,'sc_worker'=>.006,'sc_employer_indefinite'=>.024,'sc_employer_fixed'=>.03,'sanna'=>.0003,'reform_afp'=>.001,'reform_ssp'=>.009,'family_allowance'=>15000,'afp_rates'=>['Modelo'=>.1177], 'tax_brackets'=>[[0,941638,0,0],[941639,2092530,.04,37666],[2092531,3487550,.08,121367]]];
+$e=['base_salary'=>850000,'contract_type'=>'Indefinido','gratification_type'=>'Art.50','health_institution'=>'Fonasa','isapre_plan_uf'=>0,'afp'=>'Modelo','meal_allowance'=>50000,'transport_allowance'=>40000,'family_loads'=>1,'mutual_rate'=>.009,'contributes_afp'=>1];
+$v=['medical_leave_days'=>0,'unpaid_leave_days'=>0,'overtime_50'=>0,'overtime_100'=>0,'taxable_bonus'=>0,'commissions'=>0,'guaranteed_gratification'=>0,'non_taxable_bonus'=>0,'advance'=>0,'company_loan'=>0,'ccaf_loan'=>0,'other_discounts'=>0];$r=(new PayrollCalculator())->calculate($e,$v,$p);assert($r['days']===30);assert($r['sb']===850000);assert($r['taxable']>850000);assert($r['net']>0);echo "PayrollCalculator tests passed\n";
