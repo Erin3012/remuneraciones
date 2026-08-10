@@ -9,14 +9,26 @@ CREATE TABLE companies (
 
 CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  company_id BIGINT UNSIGNED NOT NULL,
+  company_id BIGINT UNSIGNED NULL,
   name VARCHAR(120) NOT NULL,
   email VARCHAR(180) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin','operator') NOT NULL DEFAULT 'operator',
+    global_role ENUM('none','admin') NOT NULL DEFAULT 'none',
     active TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_user_email (email),
+  FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE user_companies (
+  user_id BIGINT UNSIGNED NOT NULL,
+  company_id BIGINT UNSIGNED NOT NULL,
+  role ENUM('admin','operator') NOT NULL DEFAULT 'operator',
+  active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, company_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
