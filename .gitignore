@@ -3,6 +3,8 @@
 !.env.example
 *.zip
 *.log
+/.phpunit.result.cache
+composer.phar
 /.idea/
 /.vscode/
 /.codex/

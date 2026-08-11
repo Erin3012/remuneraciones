@@ -12,6 +12,8 @@ Aplicación web PHP/MySQL para gestionar remuneraciones multiempresa, basada en 
 
 La aplicación no consulta sitios externos automáticamente. Los parámetros previsionales y tributarios se cargan por período y quedan registrados en la base de datos.
 
+La descarga de liquidaciones usa Dompdf y sus dependencias se incluyen en `vendor/`. En cPanel no es necesario ejecutar Composer: el archivo `.cpanel.yml` copia `vendor/` durante el despliegue.
+
 ## Estructura
 
 - `public/index.php`: front controller, autenticación y pantallas.
