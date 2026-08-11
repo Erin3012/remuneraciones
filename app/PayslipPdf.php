@@ -5,12 +5,17 @@ final class PayslipPdf
     private array $content = [];
     private float $y = 806;
 
-    public static function download(array $employee, array $calc, string $period, string $company): never
+    public static function render(array $employee, array $calc, string $period, string $company): string
     {
         $pdf = new self();
         $pdf->draw($employee, $calc, $period, $company);
+        return $pdf->build();
+    }
+
+    public static function download(array $employee, array $calc, string $period, string $company): never
+    {
         $name = preg_replace('/[^A-Za-z0-9_-]+/', '_', (string)$employee['full_name']) ?: 'liquidacion';
-        $data = $pdf->build();
+        $data = self::render($employee, $calc, $period, $company);
         while (ob_get_level() > 0) ob_end_clean();
         header_remove();
         header('Content-Type: application/pdf');
