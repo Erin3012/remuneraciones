@@ -18,3 +18,4 @@ body.page-payslip{page:payslip-single}@page payslip-single{size:600pt 800pt;marg
 @page payslips-print{size:A4 portrait;margin:10mm}
 .payslip-summary-grid{display:flex!important;align-items:stretch;width:100%;gap:12px}.payslip-summary-grid>section{display:block!important;flex:1 1 50%;width:50%;min-width:0}@media(max-width:700px){.payslip-summary-grid{display:block!important}.payslip-summary-grid>section{width:100%;margin-bottom:12px}}
 @page payslip-single{size:A4 portrait;margin:10mm}@media print{body.page-payslip main{max-width:none!important;margin:0!important;padding:0!important}body.page-payslip .payslip-reference{box-sizing:border-box!important;width:190mm!important;max-width:190mm!important;margin:0 auto!important;padding:0!important;border:0!important;box-shadow:none!important}}
+.payslip-summary-grid .total-line{font-weight:700;margin-top:12px!important;padding-top:7px;border-top:2px solid #102a43}.payslip-summary-grid .total-line strong{font-weight:800}
