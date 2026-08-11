@@ -83,6 +83,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #172033; font-famil
 .signature-grid > div { display: table-cell; width: 50%; padding: 0 35px; }
 .signature-grid span { display: block; border-top: 1px solid #172033; margin-bottom: 6px; }
 .signature-grid small { display: block; margin-top: 3px; }
+.batch-payslip { page-break-after: always; break-after: page; }
+.batch-payslip:last-child { page-break-after: auto; break-after: auto; }
 CSS;
     }
 }
