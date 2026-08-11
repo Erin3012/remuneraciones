@@ -69,8 +69,8 @@ html, body { margin: 0; padding: 0; background: #fff; color: #172033; font-famil
 .payslip-date { text-align: right; font-size: .85rem; line-height: 1.7; }
 .employee-data { display: table; width: 100%; box-sizing: border-box; border: 1px solid #cfd8e3; background: #f7f9fb; padding: 10px; margin-bottom: 12px; font-size: .85rem; }
 .employee-data > div { display: inline-block; width: 49%; margin-bottom: 5px; vertical-align: top; }
-.payslip-summary-grid { display: table; width: 100%; table-layout: fixed; border-spacing: 12px 0; margin-left: -12px; }
-.payslip-summary-grid > section { display: table-cell; width: 50%; border: 1px solid #aebdca; padding: 10px; vertical-align: top; }
+.payslip-summary-grid { display: table !important; width: 100% !important; table-layout: fixed; border-spacing: 12px 0; margin-left: -12px; }
+.payslip-summary-grid > section { display: table-cell !important; width: 50% !important; border: 1px solid #aebdca; padding: 10px; vertical-align: top; }
 .payslip-summary-grid h2 { font-size: 1rem; margin: 0 0 7px; padding-bottom: 5px; border-bottom: 1px solid #aebdca; }
 .payslip-summary-grid p { margin: 5px 0; font-size: .82rem; }
 .payslip-summary-grid p strong { float: right; }
