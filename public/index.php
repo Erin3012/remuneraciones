@@ -22,7 +22,7 @@ if($user && $_SERVER['REQUEST_METHOD']==='POST' && $page==='employee-csv-import'
 if(!$user && !in_array($page,['login','register','setup'],true))go('login');
 if($user && $page==='dashboard')go('employees');
 if($user && $page==='payslip-pdf')servePayslipPdf();
-if($user && $page==='payslips-all')go('payslips-all-pdf');
+if($user && $page==='payslips-all'){header('Location: index.php?page=payslips-all-pdf&period='.rawurlencode((string)($_GET['period']??'')));exit;}
 if($user && $page==='payslips-all-pdf')servePayslipsAllPdf();
 if($user && in_array($page,['period-new','period-save','parameter-example','parameter-save','parameter-advanced-save','period-status','users','user-save'],true))adminOnly();
 if($user && in_array($page,['global-users','global-user-save','membership-save'],true))globalAdminOnly();
