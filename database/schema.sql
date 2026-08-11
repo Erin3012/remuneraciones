@@ -83,6 +83,16 @@ CREATE TABLE parameter_versions (
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE global_parameter_versions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  period CHAR(7) NOT NULL,
+  values_json JSON NOT NULL,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_global_parameters_period (period),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE payroll_variables (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   period_id BIGINT UNSIGNED NOT NULL,
