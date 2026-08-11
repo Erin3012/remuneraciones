@@ -43,30 +43,30 @@ final class PayslipPdf
         $this->text(45, 699, 'Contrato: '.$e['contract_type'], 8);
         $this->text(295, 699, 'AFP: '.$e['afp'].'   Salud: '.$e['health_institution'], 8);
 
-        $this->section(36, 430, 255, 'Haberes');
-        $this->section(304, 430, 255, 'Descuentos');
+        $this->section(36, 340, 255, 'Haberes');
+        $this->section(304, 340, 255, 'Descuentos');
         $money = static fn($v): string => '$'.number_format((float)$v, 0, ',', '.');
         $left = [['Sueldo base proporcional',$r['sb']],['Horas extra 50%',$r['ot50']],['Horas extra 100%',$r['ot100']],['Bono imponible',$r['bonus']],['Comisiones',$r['comm']],['Gratificacion',$r['grat']],['Colacion',$r['meal']],['Movilizacion',$r['transport']],['Asignacion familiar',$r['family']],['Aguinaldo no imponible',$r['nonTax']]];
         $right = [['AFP',$r['afp']],['Salud',$r['health']],['Seguro cesantia',$r['scWorker']],['Impuesto unico',$r['iusc']]];
-        $this->rows(36, 407, 255, $left, $money);
-        $this->rows(304, 407, 255, $right, $money);
+        $this->rows(36, 645, 255, $left, $money);
+        $this->rows(304, 645, 255, $right, $money);
         $legal=(float)$r['afp']+(float)$r['health']+(float)$r['scWorker']+(float)$r['iusc'];
         $other=(float)($r['advance']??0)+(float)($r['company_loan']??0)+(float)($r['ccaf_loan']??0)+(float)($r['other_discounts']??0);
-        $this->total(36, 224, 255, 'TOTAL IMPONIBLE', $money($r['taxable']));
-        $this->total(36, 195, 255, 'TOTAL NO IMPONIBLE', $money((float)$r['haberes']-(float)$r['taxable']));
-        $this->total(36, 166, 255, 'TOTAL HABERES', $money($r['haberes']));
-        $this->total(304, 224, 255, 'DESCUENTOS LEGALES', $money($legal));
-        $this->rows(304, 207, 255, [['Anticipo',$r['advance']??0],['Prestamo empresa',$r['company_loan']??0],['Prestamo CCAF',$r['ccaf_loan']??0],['Otros descuentos',$r['other_discounts']??0]], $money);
-        $this->total(304, 122, 255, 'TOTAL OTROS DESCUENTOS', $money($other));
-        $this->total(304, 93, 255, 'TOTAL DESCUENTOS', $money($r['discounts']));
-        $this->total(36, 105, 523, 'LIQUIDO A PAGAR', $money($r['net']), 13);
-        $this->text(36, 82, 'SON: '.moneyWords((float)$r['net']), 9, true);
-        $this->text(36, 58, 'Recibi conforme el monto indicado en esta liquidacion.', 8);
-        $this->line(55, 28, 240, 28, .8);$this->line(355, 28, 540, 28, .8);
-        $this->text(91, 15, 'Firma del empleador', 8, true);$this->text(396, 15, 'Firma del trabajador', 8, true);
+        $this->total(36, 470, 255, 'TOTAL IMPONIBLE', $money($r['taxable']));
+        $this->total(36, 440, 255, 'TOTAL NO IMPONIBLE', $money((float)$r['haberes']-(float)$r['taxable']));
+        $this->total(36, 410, 255, 'TOTAL HABERES', $money($r['haberes']));
+        $this->total(304, 565, 255, 'DESCUENTOS LEGALES', $money($legal));
+        $this->rows(304, 540, 255, [['Anticipo',$r['advance']??0],['Prestamo empresa',$r['company_loan']??0],['Prestamo CCAF',$r['ccaf_loan']??0],['Otros descuentos',$r['other_discounts']??0]], $money);
+        $this->total(304, 460, 255, 'TOTAL OTROS DESCUENTOS', $money($other));
+        $this->total(304, 430, 255, 'TOTAL DESCUENTOS', $money($r['discounts']));
+        $this->total(36, 300, 523, 'LIQUIDO A PAGAR', $money($r['net']), 13);
+        $this->text(36, 277, 'SON: '.moneyWords((float)$r['net']), 9, true);
+        $this->text(36, 253, 'Recibi conforme el monto indicado en esta liquidacion.', 8);
+        $this->line(55, 223, 240, 223, .8);$this->line(355, 223, 540, 223, .8);
+        $this->text(91, 210, 'Firma del empleador', 8, true);$this->text(396, 210, 'Firma del trabajador', 8, true);
     }
 
-    private function section(float $x,float $y,float $w,string $title): void {$this->rect($x,$y,$w,267);$this->text($x+9,$y+249,$title,10,true);$this->line($x+8,$y+243,$x+$w-8,$y+243,.7);}
+    private function section(float $x,float $y,float $w,string $title): void {$this->rect($x,$y,$w,330);$this->text($x+9,$y+312,$title,10,true);$this->line($x+8,$y+306,$x+$w-8,$y+306,.7);}
     private function rows(float $x,float $y,float $w,array $rows,callable $money): void {foreach($rows as [$label,$value]){if(abs((float)$value)<.00001)continue;$this->text($x+9,$y,$label,8);$this->text($x+$w-78,$y,$money($value),8,true);$y-=16;}}
     private function total(float $x,float $y,float $w,string $label,string $value,float $size=9): void {$this->line($x+8,$y+10,$x+$w-8,$y+10,1);$this->text($x+9,$y,$label,$size,true);$this->text($x+$w-90,$y,$value,$size,true);}
     private function text(float $x,float $y,string $text,float $size=9,bool $bold=false): void {$font=$bold?'/F2':'/F1';$this->content[]="BT {$font} {$size} Tf 1 0 0 1 ".number_format($x,2,'.','').' '.number_format($y,2,'.','')." Tm (".$this->escape($text).") Tj ET";}
