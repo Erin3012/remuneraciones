@@ -2,7 +2,7 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__.'/../app/Database.php'; require_once __DIR__.'/../app/PayrollCalculator.php'; require_once __DIR__.'/../app/LreExporter.php'; require_once __DIR__.'/../app/ExcelImporter.php'; require_once __DIR__.'/../app/BookExporter.php'; require_once __DIR__.'/../app/PayslipPdf.php';
-$pdo=Database::connection(); $page=$_GET['page']??'dashboard'; $user=$_SESSION['user']??null;
+$pdo=Database::connection(); $page=$_GET['page']??'dashboard'; $user=$_SESSION['user']??null; if($page==='employee-examples')go('employees');
 function h(mixed $v): string{return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}
 function normalizeRut(string $rut): string{return strtoupper(str_replace(['.','-',' '],'',trim($rut)));}
 function go(string $p): never{header('Location: index.php?page='.$p);exit;}
