@@ -1,5 +1,5 @@
 -- Carga puntual de trabajadores externos. No borra empresas ni usuarios.
--- Ejecutar despuÃ©s de respaldar la base productiva.
+-- Ejecutar despuÃƒÂ©s de respaldar la base productiva.
 START TRANSACTION;
 INSERT INTO companies(name,rut,giro) VALUES ('COMERCIALIZADORA Y MAESTRANZA PEDREROS Y BADILLA LTDA.','76.271.277-6','Empresa externa')
 ON DUPLICATE KEY UPDATE name=VALUES(name),giro=VALUES(giro);
@@ -8,7 +8,7 @@ INSERT INTO employees(company_id,rut,full_name,hire_date,termination_date,positi
 VALUES
 (@external_company_id,'10.195.549-4','PALMA MARTINEZ JUAN CARLOS',NULL,NULL,'Trabajador','550000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_101955494','100500.00','40000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'10.384.555-6','SILVA ARRIAGADA CLAUDIO ARNOLDO',NULL,NULL,'Trabajador','682500.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_103845556','45500.00','59000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'10.478.555-7','PE?A RODRIGUEZ JUAN CARLOS',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_104785557','44787.00','40387.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'10.478.555-7','PEÑA RODRIGUEZ JUAN CARLOS',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_104785557','44787.00','40387.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'10.529.525-1','REBOLLEDO PEDREROS EMILIANO TERCERO',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_105295251','50000.00','80000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'10.666.722-5','NORAMBUENA CONTRERAS ELIAS NAZARET',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_106667225','75000.00','115000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'11.182.334-0','ESCOBAR OLAVE JUAN CARLOS',NULL,NULL,'Trabajador','588000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_111823340','50000.00','40000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
@@ -32,15 +32,15 @@ VALUES
 (@external_company_id,'15.220.484-1','PEDREROS CONCHA HECTOR PATRICIO',NULL,NULL,'Trabajador','1000000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_152204841','50000.00','70000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'16.036.354-1','REBOLLEDO REBOLLEDO EDUARDO MARCELO',NULL,NULL,'Trabajador','598500.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_160363541','70332.00','50000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'16.387.908-5','ABURTO OLIVARES BERNARDO ENRIQUE',NULL,NULL,'Trabajador','700000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_163879085','50000.00','45000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'17.393.837-3','MERI?O CABRERA ROMINA INES',NULL,NULL,'Trabajador','900000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_173938373','41936.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'17.393.837-3','MERIÑO CABRERA ROMINA INES',NULL,NULL,'Trabajador','900000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_173938373','41936.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'17.787.843-K','QUIJADA VALERIA LUIS ALEJANDRO',NULL,NULL,'Trabajador','686275.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_17787843K','126000.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'18.070.140-0','FUENTES PE?A PATRICIO ANDRES',NULL,NULL,'Trabajador','600000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_180701400','78500.00','138875.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'18.070.140-0','FUENTES PEÑA PATRICIO ANDRES',NULL,NULL,'Trabajador','600000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_180701400','78500.00','138875.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'18.405.834-0','VINET CORREA EDGAR EDUARDO',NULL,NULL,'Trabajador','535101.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_184058340','58000.00','38667.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'19.273.205-0','ARRIAGADA GUZMAN RUBEN ALEXIS',NULL,NULL,'Trabajador','735000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_192732050','80500.00','43200.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'19.335.440-8','SILVA DURAN BASTIAN HERNAN',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_193354408','50000.00','50000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'19.815.170-K','JARAMILLO LARA DIEGO ESTEBAN',NULL,NULL,'Trabajador','579033.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_19815170K','73500.00','84583.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'20.088.344-6','MU?OZ ARRIAGADA ALONSO NICOLAS',NULL,NULL,'Trabajador','735000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_200883446','94500.00','42000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'20.149.725-6','CABEZAS PE?A VICTOR ANDRES',NULL,NULL,'Trabajador','735000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_201497256','80500.00','43200.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'20.088.344-6','MUÑOZ ARRIAGADA ALONSO NICOLAS',NULL,NULL,'Trabajador','735000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_200883446','94500.00','42000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'20.149.725-6','CABEZAS PEÑA VICTOR ANDRES',NULL,NULL,'Trabajador','735000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_201497256','80500.00','43200.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'20.439.699-K','ULLOA CAMORRO NICOLAS MAXIMILIANO',NULL,NULL,'Trabajador','750000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_20439699K','0.00','27312.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'21.065.439-9','COLIL CORREA BRAYAN ANTONIO',NULL,NULL,'Trabajador','560000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_210654399','55000.00','59520.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'21.469.336-4','LEMUNAO QUIROZ LEANDRO IGNACIO',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_214693364','0.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
@@ -49,7 +49,7 @@ VALUES
 (@external_company_id,'22.150.064-4','ANTIPI LARENAS JOAQUIN ALEXIS',NULL,NULL,'Trabajador','550000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_221500644','0.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'22.166.304-7','TORRES VELOSO TREVOR ALEXANDER',NULL,NULL,'Trabajador','597000.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_221663047','0.00','34412.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'22.328.365-9','SAN MARTIN DIAZ DAVID EDUARDO',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_223283659','0.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
-(@external_company_id,'28.165.529-9','MU?OZ VILLANUEVA LILIANA GABRIELA',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_281655299','110061.00','94937.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
+(@external_company_id,'28.165.529-9','MUÑOZ VILLANUEVA LILIANA GABRIELA',NULL,NULL,'Trabajador','553553.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_281655299','110061.00','94937.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'8.713.684-1','VARGAS SUAREZ GUIDO ENRIQUE',NULL,NULL,'Trabajador','55355.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_87136841','8000.00','7000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'9.331.031-4','PAREDES RIQUELME NESTOR MANUEL',NULL,NULL,'Trabajador','0.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_93310314','0.00','0.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
 (@external_company_id,'9.655.946-1','PINO SANHUEZA HECTOR RUBEN',NULL,NULL,'Trabajador','687570.00','Plazo Fijo','Garantizada','Fonasa','0.0000','EXT_96559461','87500.00','50000.00','0',NULL,NULL,NULL,'0.00900','1','Activo'),
