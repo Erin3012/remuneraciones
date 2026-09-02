@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 final class PayrollCalculator {
-    private static function n(mixed $v): float { return round((float)($v ?? 0)); }
+    private static function n(mixed $v): float { return (float)($v ?? 0); }
     private static function r(float $v): int { return (int)round($v, 0, PHP_ROUND_HALF_UP); }
 
     public function calculate(array $e, array $v, array $p): array {
