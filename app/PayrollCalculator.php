@@ -14,6 +14,7 @@ final class PayrollCalculator {
         $ot100 = self::r($base/182*2*self::n($v['overtime_100'] ?? 0));
         $agreedOt = self::r(self::n($v['agreed_overtime_hours'] ?? 0)*self::n($v['agreed_overtime_value'] ?? 0));
         $bonus = self::n($v['taxable_bonus'] ?? 0); $comm = self::n($v['commissions'] ?? 0);
+        $attendanceLunch = self::n($v['attendance_lunch'] ?? 0); $attendanceSnack = self::n($v['attendance_snack'] ?? 0);
         $grat = ($e['gratification_type'] ?? 'Art.50') === 'Garantizada' ? self::n($v['guaranteed_gratification'] ?? 0) : min(self::r(($sb+$ot50+$ot100+$bonus+$comm)*.25), self::r(self::n($p['minimum_wage'])*4.75/12));
         $taxable = $sb+$ot50+$ot100+$agreedOt+$bonus+$comm+$grat;
         $afpCap = self::r(self::n($p['afp_cap_uf'])*self::n($p['uf'])); $scCap = self::r(self::n($p['unemployment_cap_uf'])*self::n($p['uf']));
@@ -25,11 +26,11 @@ final class PayrollCalculator {
         $iuscBase = max(0,$taxable-$afp-min($health,$selfHealthCap=$p['health_cap'] ?? 0)-$scWorker);
         $iusc = $this->tax($iuscBase,$p);
         $meal = self::r(self::n($e['meal_allowance'])*$days/30); $transport = self::r(self::n($e['transport_allowance'])*$days/30);
-        $familyRate=self::n($p['family_allowance']); foreach(($p['family_brackets']??[]) as $bracket){if($taxable<=(float)$bracket[0]){$familyRate=(float)$bracket[1];break;}} $family = (int)($e['family_loads'] ?? 0) * self::r($familyRate); $nonTax = self::n($v['non_taxable_bonus'] ?? 0);
+        $familyRate=self::n($p['family_allowance']); foreach(($p['family_brackets']??[]) as $bracket){if($taxable<=(float)$bracket[0]){$familyRate=(float)$bracket[1];break;}} $family = (int)($e['family_loads'] ?? 0) * self::r($familyRate); $nonTax = self::n($v['non_taxable_bonus'] ?? 0)+$attendanceLunch+$attendanceSnack;
         $haberes = $taxable+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+self::n($v['other_discounts']);
         $sis=self::r($afpBase*self::n($p['sis'])); $mutual=self::r($afpBase*self::n($e['mutual_rate'] ?: $p['mutual'])); $scEmployer=self::r($scBase*(($e['contract_type'] ?? '')==='Indefinido'?$p['sc_employer_indefinite']:$p['sc_employer_fixed'])); $sanna=self::r($afpBase*self::n($p['sanna']));
         $reformAfp=self::r($afpBase*self::n($p['reform_afp'])); $reformSsp=self::r($afpBase*self::n($p['reform_ssp']));
-        return compact('days','sb','lic','ot50','ot100','agreedOt','bonus','comm','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>$base<self::n($p['minimum_wage'])?'Bajo ingreso mínimo':''];
+        return compact('days','sb','lic','ot50','ot100','agreedOt','bonus','comm','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','attendanceLunch','attendanceSnack','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>$base<self::n($p['minimum_wage'])?'Bajo ingreso mínimo':''];
     }
     private function tax(float $base, array $p): int { foreach (($p['tax_brackets'] ?? []) as $b) if ($base >= $b[0] && $base <= $b[1]) return max(0,self::r($base*$b[2]-$b[3])); return 0; }
 }
