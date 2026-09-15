@@ -22,11 +22,11 @@ final class PayrollCalculator {
         $healthBase = self::r($afpBase*.07); $plan = self::r(self::n($e['isapre_plan_uf'])*self::n($p['uf']));
         $health = ($e['health_institution'] ?? 'Fonasa') === 'Fonasa' ? $healthBase : max($healthBase,$plan); $additional = ($e['health_institution'] ?? 'Fonasa') === 'Isapre' ? max(0,$plan-$healthBase) : 0;
         $scWorker = ($e['contract_type'] ?? '') === 'Indefinido' ? self::r($scBase*self::n($p['sc_worker'])) : 0;
-        $iuscBase = max(0,$taxable-$lic-$afp-min($health,$selfHealthCap=$p['health_cap'] ?? 0)-$scWorker);
+        $iuscBase = max(0,$taxable-$afp-min($health,$selfHealthCap=$p['health_cap'] ?? 0)-$scWorker);
         $iusc = $this->tax($iuscBase,$p);
         $meal = self::r(self::n($e['meal_allowance'])*$days/30); $transport = self::r(self::n($e['transport_allowance'])*$days/30);
         $familyRate=self::n($p['family_allowance']); foreach(($p['family_brackets']??[]) as $bracket){if($taxable<=(float)$bracket[0]){$familyRate=(float)$bracket[1];break;}} $family = (int)($e['family_loads'] ?? 0) * self::r($familyRate); $nonTax = self::n($v['non_taxable_bonus'] ?? 0);
-        $haberes = $taxable-$lic+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+self::n($v['other_discounts']);
+        $haberes = $taxable+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+self::n($v['other_discounts']);
         $sis=self::r($afpBase*self::n($p['sis'])); $mutual=self::r($afpBase*self::n($e['mutual_rate'] ?: $p['mutual'])); $scEmployer=self::r($scBase*(($e['contract_type'] ?? '')==='Indefinido'?$p['sc_employer_indefinite']:$p['sc_employer_fixed'])); $sanna=self::r($afpBase*self::n($p['sanna']));
         $reformAfp=self::r($afpBase*self::n($p['reform_afp'])); $reformSsp=self::r($afpBase*self::n($p['reform_ssp']));
         return compact('days','sb','lic','ot50','ot100','agreedOt','bonus','comm','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>$base<self::n($p['minimum_wage'])?'Bajo ingreso mínimo':''];
