@@ -14,7 +14,7 @@ final class PayrollCalculator {
         $ot100 = self::r($base/182*2*self::n($v['overtime_100'] ?? 0));
         $agreedOt = self::r(self::n($v['agreed_overtime_hours'] ?? 0)*self::n($v['agreed_overtime_value'] ?? 0));
         $bonus = self::n($v['taxable_bonus'] ?? 0); $comm = self::n($v['commissions'] ?? 0);
-        $attendanceLunch = self::n($v['attendance_lunch'] ?? 0); $attendanceSnack = self::n($v['attendance_snack'] ?? 0);
+        $attendanceLunch = (int)round(self::n($v['attendance_lunch'] ?? 0)); $attendanceSnack = (int)round(self::n($v['attendance_snack'] ?? 0));
         $grat = ($e['gratification_type'] ?? 'Art.50') === 'Garantizada' ? self::n($v['guaranteed_gratification'] ?? 0) : min(self::r(($sb+$ot50+$ot100+$bonus+$comm)*.25), self::r(self::n($p['minimum_wage'])*4.75/12));
         $taxable = $sb+$ot50+$ot100+$agreedOt+$bonus+$comm+$grat;
         $afpCap = self::r(self::n($p['afp_cap_uf'])*self::n($p['uf'])); $scCap = self::r(self::n($p['unemployment_cap_uf'])*self::n($p['uf']));
