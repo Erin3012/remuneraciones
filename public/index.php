@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-ob_start(function(string $output): string { global $user; if (($user['role'] ?? '') !== 'admin') $output = str_replace('<a href="?page=company-new">Nueva empresa</a>', '', $output); return $output; });
+ob_start(function(string $output): string { global $user; if (($user['role'] ?? '') !== 'admin') $output = str_replace('<a href="?page=company-new">Nueva empresa</a>', '', $output); $fonts='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">'; return str_replace('<link rel="stylesheet" href="style.css">',$fonts.'<link rel="stylesheet" href="style.css">',$output); });
 session_start();
 require_once __DIR__.'/../app/Database.php'; require_once __DIR__.'/../app/PayrollCalculator.php'; require_once __DIR__.'/../app/LreExporter.php'; require_once __DIR__.'/../app/ExcelImporter.php'; require_once __DIR__.'/../app/BookExporter.php'; require_once __DIR__.'/../app/PayslipPdf.php';
 $pdo=Database::connection(); $page=$_GET['page']??'dashboard'; $user=$_SESSION['user']??null; if($page==='employee-examples')go('employees');
