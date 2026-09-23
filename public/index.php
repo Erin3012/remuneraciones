@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+ob_start(function(string $output): string { global $user; if (($user['role'] ?? '') !== 'admin') $output = str_replace('<a href="?page=company-new">Nueva empresa</a>', '', $output); return $output; });
 session_start();
 require_once __DIR__.'/../app/Database.php'; require_once __DIR__.'/../app/PayrollCalculator.php'; require_once __DIR__.'/../app/LreExporter.php'; require_once __DIR__.'/../app/ExcelImporter.php'; require_once __DIR__.'/../app/BookExporter.php'; require_once __DIR__.'/../app/PayslipPdf.php';
 $pdo=Database::connection(); $page=$_GET['page']??'dashboard'; $user=$_SESSION['user']??null; if($page==='employee-examples')go('employees');
