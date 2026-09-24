@@ -105,6 +105,7 @@ CREATE TABLE payroll_variables (
   commissions DECIMAL(14,2) NOT NULL DEFAULT 0,
   guaranteed_gratification DECIMAL(14,2) NOT NULL DEFAULT 0,
   non_taxable_bonus DECIMAL(14,2) NOT NULL DEFAULT 0,
+  viatico DECIMAL(14,0) NOT NULL DEFAULT 0,
   advance DECIMAL(14,2) NOT NULL DEFAULT 0,
   company_loan DECIMAL(14,2) NOT NULL DEFAULT 0,
   ccaf_loan DECIMAL(14,2) NOT NULL DEFAULT 0,
