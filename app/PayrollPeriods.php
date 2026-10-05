@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /** Global period publication, locking and immutable company payroll snapshots. */
 final class PayrollPeriods {
-    public const VARIABLE_FIELDS = ['medical_leave_days','unpaid_leave_days','overtime_50','overtime_100','agreed_overtime_hours','agreed_overtime_value','taxable_bonus','commissions','guaranteed_gratification','non_taxable_bonus','viatico','advance','company_loan','ccaf_loan','other_discounts'];
+    public const VARIABLE_FIELDS = ['medical_leave_days','unpaid_leave_days','overtime_50','overtime_100','agreed_overtime_hours','agreed_overtime_value','taxable_bonus','commissions','guaranteed_gratification','patriotic_bonus','non_taxable_bonus','viatico','advance','company_loan','ccaf_loan','patriotic_bonus_discount','other_discounts'];
     private string $mutex;
 
     public function __construct(private PDO $pdo) {
