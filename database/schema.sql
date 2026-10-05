@@ -64,9 +64,7 @@ CREATE TABLE payroll_periods (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   company_id BIGINT UNSIGNED NOT NULL,
   period CHAR(7) NOT NULL,
-  status ENUM('draft','review','closed') NOT NULL DEFAULT 'draft',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  closed_at TIMESTAMP NULL,
   UNIQUE KEY uq_period_company (company_id,period),
   FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -101,6 +99,8 @@ CREATE TABLE payroll_variables (
   unpaid_leave_days INT NOT NULL DEFAULT 0,
   overtime_50 DECIMAL(10,2) NOT NULL DEFAULT 0,
   overtime_100 DECIMAL(10,2) NOT NULL DEFAULT 0,
+  agreed_overtime_hours DECIMAL(10,2) NOT NULL DEFAULT 0,
+  agreed_overtime_value DECIMAL(14,2) NOT NULL DEFAULT 0,
   taxable_bonus DECIMAL(14,2) NOT NULL DEFAULT 0,
   commissions DECIMAL(14,2) NOT NULL DEFAULT 0,
   guaranteed_gratification DECIMAL(14,2) NOT NULL DEFAULT 0,
@@ -137,4 +137,19 @@ CREATE TABLE audit_logs (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE global_period_closures (
+  period CHAR(7) NOT NULL PRIMARY KEY,
+  closed_at TIMESTAMP NULL,
+  closed_by BIGINT UNSIGNED NULL,
+  snapshot_pending TINYINT(1) NOT NULL DEFAULT 0,
+  FOREIGN KEY (closed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE payroll_period_snapshots (
+  period_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+  snapshot_json JSON NOT NULL,
+  captured_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (period_id) REFERENCES payroll_periods(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

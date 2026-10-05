@@ -1,12 +1,14 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/qlccl/qlccl/remuneraciones/
+    - export DEPLOYPATH=/home/qlccl/remuneraciones/
     - /bin/cp -R app $DEPLOYPATH
     - /bin/cp -R vendor $DEPLOYPATH
     - /bin/cp -R database $DEPLOYPATH
     - /bin/cp -R public $DEPLOYPATH
     - /bin/cp -R tests $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH/tools
+    - /bin/cp tools/migrate_global_periods.php $DEPLOYPATH/tools/
     - /bin/cp README.md $DEPLOYPATH
     - /bin/cp composer.json $DEPLOYPATH
     - /bin/cp composer.lock $DEPLOYPATH
