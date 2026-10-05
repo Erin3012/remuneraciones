@@ -112,6 +112,8 @@ CREATE TABLE payroll_variables (
   ccaf_loan DECIMAL(14,2) NOT NULL DEFAULT 0,
   patriotic_bonus_discount DECIMAL(14,0) NOT NULL DEFAULT 0,
   other_discounts DECIMAL(14,2) NOT NULL DEFAULT 0,
+  meal_allowance_override DECIMAL(14,0) NULL DEFAULT NULL,
+  transport_allowance_override DECIMAL(14,0) NULL DEFAULT NULL,
   UNIQUE KEY uq_variable_employee_period (period_id,employee_id),
   FOREIGN KEY (period_id) REFERENCES payroll_periods(id) ON DELETE CASCADE,
   FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE

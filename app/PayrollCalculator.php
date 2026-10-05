@@ -33,7 +33,10 @@ final class PayrollCalculator {
         $scWorker = ($e['contract_type'] ?? '') === 'Indefinido' ? self::r($scBase*self::n($p['sc_worker'])) : 0;
         $iuscBase = max(0,$taxable-$afp-min($health,$selfHealthCap=$p['health_cap'] ?? 0)-$scWorker);
         $iusc = $this->tax($iuscBase,$p);
-        $meal = self::r(self::n($e['meal_allowance'])*$days/30); $transport = self::r(self::n($e['transport_allowance'])*$days/30);
+        // Overrides are final amounts for this month: null inherits the employee
+        // allowance, while zero explicitly means no allowance. Do not prorate twice.
+        $meal = isset($v['meal_allowance_override']) ? self::r(self::n($v['meal_allowance_override'])) : self::r(self::n($e['meal_allowance'])*$days/30);
+        $transport = isset($v['transport_allowance_override']) ? self::r(self::n($v['transport_allowance_override'])) : self::r(self::n($e['transport_allowance'])*$days/30);
         $familyRate=self::n($p['family_allowance']); foreach(($p['family_brackets']??[]) as $bracket){if($taxable<=(float)$bracket[0]){$familyRate=(float)$bracket[1];break;}} $family = (int)($e['family_loads'] ?? 0) * self::r($familyRate); $nonTaxableBonus=self::n($v['non_taxable_bonus'] ?? 0); $viatico=self::n($v['viatico'] ?? 0); $nonTax = $nonTaxableBonus+$viatico+$attendanceLunch+$attendanceSnack;
         $patrioticBonusDiscount = self::n($v['patriotic_bonus_discount'] ?? 0);
         $haberes = $taxable+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+$patrioticBonusDiscount+self::n($v['other_discounts']);

@@ -131,11 +131,17 @@ if ($user) {
             if ((int)($_POST['period_id']??0)!==(int)$pp['id']) throw new RuntimeException('El período no corresponde a la empresa seleccionada.');
             $periodService->editable($period,function() use ($pdo,$periodService,$companyId,$period,$pp) {
                 $allowed=array_column($periodService->rows($companyId,$period),null,'id');
-                $fields=PayrollPeriods::VARIABLE_FIELDS;$columns=implode(',',$fields);$updates=implode(',',array_map(fn($f)=>$f.'=VALUES('.$f.')',$fields));
+                $fields=array_merge(PayrollPeriods::VARIABLE_FIELDS,PayrollPeriods::ALLOWANCE_OVERRIDE_FIELDS);$columns=implode(',',$fields);$updates=implode(',',array_map(fn($f)=>$f.'=VALUES('.$f.')',$fields));
                 $save=$pdo->prepare('INSERT INTO payroll_variables(period_id,employee_id,'.$columns.') VALUES('.implode(',',array_fill(0,count($fields)+2,'?')).') ON DUPLICATE KEY UPDATE '.$updates);
                 foreach ($_POST['medical_leave_days']??[] as $id=>$unused) {
                     if (!isset($allowed[$id])) throw new RuntimeException('El trabajador no pertenece a esta empresa y período.');
-                    $values=[(int)$pp['id'],(int)$id];foreach ($fields as $key) {$value=$_POST[$key][$id]??0;if (!is_numeric($value)) throw new RuntimeException('Ingresa un valor numérico válido.');$values[]=(int)round((float)$value);}
+                    $values=[(int)$pp['id'],(int)$id];foreach ($fields as $key) {
+                        if (in_array($key,PayrollPeriods::ALLOWANCE_OVERRIDE_FIELDS,true)) {
+                            $value=$_POST[$key][$id]??($allowed[$id][$key]??null);
+                            $values[]=PayrollPeriods::allowanceOverride($value);continue;
+                        }
+                        $value=$_POST[$key][$id]??0;if (!is_numeric($value)) throw new RuntimeException('Ingresa un valor numérico válido.');$values[]=(int)round((float)$value);
+                    }
                     $save->execute($values);
                 }
             });go('variables-grid&period='.rawurlencode($period));

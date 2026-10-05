@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__.'/../tools/migrate_global_periods.php';
+require_once __DIR__.'/../tools/migrate_monthly_allowances.php';
 require_once __DIR__.'/../app/BookExporter.php';
 require_once __DIR__.'/../app/LreExporter.php';
 $user=null;require_once __DIR__.'/../app/PayrollReports.php';
@@ -29,6 +30,8 @@ $request=static function(int $userId,int $companyId,string $page,array $get=[],a
 };
 try {
     runSql($pdo,__DIR__.'/../database/schema.sql');
+    $pdo->exec('ALTER TABLE payroll_variables DROP COLUMN meal_allowance_override, DROP COLUMN transport_allowance_override');
+    migrateMonthlyAllowances($pdo);migrateMonthlyAllowances($pdo);
     foreach (['migration_attendance.sql','migration_attendance_allowances.sql','migration_attendance_redesign.sql'] as $file) runSql($pdo,__DIR__.'/../database/'.$file);
     $pdo->exec('ALTER TABLE payroll_periods ADD COLUMN status ENUM("draft","review","closed") NOT NULL DEFAULT "draft", ADD COLUMN closed_at TIMESTAMP NULL');
     $pdo->exec("INSERT INTO companies(name,rut) VALUES('Empresa A','A'),('Empresa B','B')");
@@ -57,6 +60,13 @@ try {
     [$status,$body]=$request(2,1,'parameters');check($status===200&&!str_contains($body,'Cerrar período'),'Operador ve acciones administrativas');
     [$status]=$request(2,1,'period-new');check($status===403,'Operador puede crear períodos');
     [$status]=$request(2,1,'variables-save',[],['period'=>'2026-09','period_id'=>$pp['id'],'medical_leave_days'=>[1=>2],'unpaid_leave_days'=>[1=>1],'viatico'=>[1=>10000]]);check($status===302,'Variables abiertas no guardadas');
+    $overridePost=['period'=>'2026-09','period_id'=>$pp['id'],'medical_leave_days'=>[1=>2],'unpaid_leave_days'=>[1=>1],'viatico'=>[1=>10000]];
+    [$status]=$request(2,1,'variables-save',[],$overridePost+['meal_allowance_override'=>[1=>80000],'transport_allowance_override'=>[1=>0]]);check($status===302,'Montos mensuales no guardados');
+    $override=null;foreach($periods->data(1,'2026-09')['workers'] as $worker)if((int)$worker['employee']['id']===1)$override=$worker;check($override['calculation']['meal']===80000&&$override['calculation']['transport']===0,'Override no aplicado sin proporcionalidad');
+    [$status]=$request(2,1,'variables-save',[],$overridePost+['meal_allowance_override'=>[1=>-1]]);check($status===422,'Se aceptó un monto mensual negativo');
+    [$status,$body]=$request(2,1,'variables-grid',['period'=>'2026-09']);check($status===200&&str_contains($body,'meal_allowance_override[1]')&&str_contains($body,'Movilización del mes'),'Faltan campos mensuales en grilla');
+    [$status]=$request(2,1,'variables-save',[],$overridePost+['meal_allowance_override'=>[1=>''],'transport_allowance_override'=>[1=>'']]);check($status===302,'No se puede volver al valor de ficha');
+    $q=$pdo->prepare('SELECT meal_allowance_override,transport_allowance_override FROM payroll_variables WHERE period_id=? AND employee_id=1');$q->execute([$pp['id']]);check($q->fetch()===['meal_allowance_override'=>null,'transport_allowance_override'=>null],'Vacío no guardó NULL');
     [$status]=$request(2,1,'variables-save',[],['period'=>'2026-09','period_id'=>$pp['id'],'medical_leave_days'=>[2=>0]]);check($status===422,'Se permitió trabajador de otra empresa');
     [$status]=$request(2,1,'variables-save',[],['period'=>'2026-09','period_id'=>$ppB['id'],'medical_leave_days'=>[1=>0]]);check($status===422,'Se permitió period_id de otra empresa');
     [$status]=$request(2,1,'attendance-day-save',[],['period'=>'2026-09','work_date'=>'2026-09-01','status'=>[1=>'present',4=>'medical_leave'],'check_in'=>[1=>'08:00'],'check_out'=>[1=>'17:00'],'lunch_amount'=>[1=>2500],'snack_amount'=>[1=>1000]]);check($status===302,'Asistencia abierta no guardada');

@@ -5,6 +5,13 @@ declare(strict_types=1);
 final class PayrollPeriods {
     public const VARIABLE_FIELDS = ['medical_leave_days','unpaid_leave_days','overtime_50','overtime_100','agreed_overtime_hours','agreed_overtime_value','taxable_bonus','commissions','guaranteed_gratification','patriotic_bonus','non_taxable_bonus','viatico','advance','company_loan','ccaf_loan','patriotic_bonus_discount','other_discounts'];
     private string $mutex;
+    public const ALLOWANCE_OVERRIDE_FIELDS = ['meal_allowance_override','transport_allowance_override'];
+
+    public static function allowanceOverride(mixed $value): ?int {
+        if ($value===null || $value==='') return null;
+        if (!is_scalar($value) || !preg_match('/^\d{1,14}$/D',(string)$value)) throw new RuntimeException('Colación y movilización del mes deben ser pesos enteros no negativos; deja vacío para usar la ficha.');
+        return (int)$value;
+    }
 
     public function __construct(private PDO $pdo) {
         $this->mutex = 'payroll-periods-'.substr(hash('sha256', (string)$pdo->query('SELECT DATABASE()')->fetchColumn()),0,32);
@@ -122,7 +129,7 @@ final class PayrollPeriods {
         $workers=[];$calculator=new PayrollCalculator();$first=$period.'-01';$last=date('Y-m-t',strtotime($first));
         foreach ($employees as $e) {
             if (($e['status']!=='Activo' && !$e['termination_date']) || ($e['hire_date'] && $e['hire_date']>$last) || ($e['termination_date'] && $e['termination_date']<$first)) continue;
-            $v=array_replace(array_fill_keys(self::VARIABLE_FIELDS,0),$variables[(int)$e['id']]??[],$allowances[(int)$e['id']]??[]);
+            $v=array_replace(array_fill_keys(self::VARIABLE_FIELDS,0),array_fill_keys(self::ALLOWANCE_OVERRIDE_FIELDS,null),$variables[(int)$e['id']]??[],$allowances[(int)$e['id']]??[]);
             $v['calendar_days']=self::calendarDays($e,$period);
             $workers[]=['employee'=>$e,'variables'=>$v,'calculation'=>$calculator->calculate($e,$v,$params)];
         }
