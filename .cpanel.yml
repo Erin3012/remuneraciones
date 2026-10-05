@@ -9,6 +9,7 @@ deployment:
     - /bin/cp -R tests $DEPLOYPATH
     - /bin/mkdir -p $DEPLOYPATH/tools
     - /bin/cp tools/migrate_global_periods.php $DEPLOYPATH/tools/
+    - /bin/cp database/migration_patriotic_bonus.sql $DEPLOYPATH/database/
     - /bin/cp README.md $DEPLOYPATH
     - /bin/cp composer.json $DEPLOYPATH
     - /bin/cp composer.lock $DEPLOYPATH
