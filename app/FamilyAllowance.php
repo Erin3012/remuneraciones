@@ -43,11 +43,21 @@ final class FamilyAllowance {
             if($amount<0||$incomeDays<0||$incomeDays>31||($amount>0&&$incomeDays===0)||($amount===0.0&&$incomeDays>0)){$missing[]=$month;continue;}
             if($incomeDays>0){$sum+=$amount;$count++;$days+=$incomeDays;}
         }
-        if($missing)return self::pending('Asignación familiar pendiente: faltan ingresos completos de '.implode(', ',$missing).'. No se consideran como cero.');
-        if($days<30||$count===0)return self::pending('Menos de 30 días con ingresos en el período de referencia: requiere revisión o tramo acreditado.');
-        $average=$sum/$count;$band='D';$rate=0;
+        if($days<30||$count===0) {
+            // Legal fallback: when the reference semester has fewer than 30 income
+            // days, use the first month in which family allowance accrued.
+            $referenceEnd=end($months);$hireMonth=substr((string)($employee['hire_date']??''),0,7);
+            $first=$history[$hireMonth]??null;
+            if($hireMonth<=$period&&$hireMonth>$referenceEnd&&$first&&($first['complete']??false)&&(int)$first['days']>0&&(float)$first['total']>0) {
+                $average=(float)$first['total'];$source='first_month';$incomeMonths=1;$incomeDays=(int)$first['days'];
+            } else return self::pending($missing?'Asignación familiar pendiente: faltan ingresos completos de '.implode(', ',$missing).'. No se consideran como cero.':'Menos de 30 días con ingresos en el período de referencia: requiere revisión o tramo acreditado.');
+        } else {
+            if($missing)return self::pending('Asignación familiar pendiente: faltan ingresos completos de '.implode(', ',$missing).'. No se consideran como cero.');
+            $average=$sum/$count;$source='history';$incomeMonths=$count;$incomeDays=$days;
+        }
+        $band='D';$rate=0;
         foreach($brackets as $i=>$bracket)if($average<=(float)$bracket[0]){$band=['A','B','C'][$i];$rate=(int)$bracket[1];break;}
-        return ['ready'=>true,'band'=>$band,'rate'=>$rate,'source'=>'history','average'=>$average,'warning'=>'','months'=>$months,'income_months'=>$count,'income_days'=>$days];
+        return ['ready'=>true,'band'=>$band,'rate'=>$rate,'source'=>$source,'average'=>$average,'warning'=>'','months'=>$months,'income_months'=>$incomeMonths,'income_days'=>$incomeDays];
     }
 
     /** Read saved payroll, not a recalculation using today's employee salary. */
@@ -57,8 +67,8 @@ final class FamilyAllowance {
         if(count($exists)!==2)return ['settings'=>[],'history'=>[]];
         $q=$pdo->prepare('SELECT s.* FROM family_allowance_settings s JOIN employees e ON e.id=s.employee_id WHERE e.company_id=? AND s.cycle_year=?');$q->execute([$companyId,self::cycle($period)]);
         foreach($q as $r)$settings[(int)$r['employee_id']]=$r;
-        $months=self::months($period,'year');
-        $q=$pdo->prepare('SELECT ps.employee_id,pp.period,ps.calculation_json,pv.medical_leave_days FROM payslips ps JOIN payroll_periods pp ON pp.id=ps.period_id LEFT JOIN payroll_variables pv ON pv.period_id=pp.id AND pv.employee_id=ps.employee_id WHERE pp.company_id=? AND pp.period BETWEEN ? AND ?');$q->execute([$companyId,$months[0],$months[count($months)-1]]);
+        $months=self::months($period,'year');$historyEnd=max(end($months),$period);
+        $q=$pdo->prepare('SELECT ps.employee_id,pp.period,ps.calculation_json,pv.medical_leave_days FROM payslips ps JOIN payroll_periods pp ON pp.id=ps.period_id LEFT JOIN payroll_variables pv ON pv.period_id=pp.id AND pv.employee_id=ps.employee_id WHERE pp.company_id=? AND pp.period BETWEEN ? AND ?');$q->execute([$companyId,$months[0],$historyEnd]);
         foreach($q as $r) {
             $calc=json_decode($r['calculation_json'],true,512,JSON_THROW_ON_ERROR);
             // A payslip alone cannot tell us the subsidy or other employer's earnings.
