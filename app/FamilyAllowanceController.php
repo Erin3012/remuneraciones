@@ -49,7 +49,7 @@ try {
         $summary.='<tr><td><a href="?page=family-allowances&period='.h($period).'&employee_id='.(int)$e['id'].'">'.h($e['full_name']).'</a></td><td>'.h($e['rut']).'</td><td>'.(int)$e['family_loads'].'</td><td>'.h($a['band']??'Pendiente').'</td><td>'.($a['ready']?'$'.number_format($a['rate'],0,',','.').' por carga':'Pendiente de antecedentes').'</td><td>'.h($origin).'</td></tr>';
     }
     $flash=isset($_SESSION['flash'])?'<p class="notice">'.h($_SESSION['flash']).'</p>':'';unset($_SESSION['flash']);
-    $body='<div class="head"><div><h1>Asignación familiar</h1><p class="muted">Empresa seleccionada · Período '.h($period).'. Se prioriza el tramo acreditado vigente.</p></div><a class="button secondary" href="?page=employees">Volver a trabajadores</a></div>'.$flash;
+    $body='<div class="head"><div><h1>Asignación familiar</h1><p class="muted">Empresa seleccionada · Período '.h($period).'. Se usa el tramo de referencia registrado; si falta, se evalúan los ingresos históricos.</p></div><a class="button secondary" href="?page=employees">Volver a trabajadores</a></div>'.$flash;
     $body.='<section class="card"><form method="get"><input type="hidden" name="page" value="family-allowances"><div class="grid"><label>Período<input type="month" name="period" value="'.h($period).'" required></label><label>Trabajador<select name="employee_id">'.$options.'</select></label></div><button>Consultar</button></form></section>';
     if($employee) {
         $setting=$context['settings'][$id]??[];$a=FamilyAllowance::assess($employee,$period,$params,$setting,$context['history'][$id]??[]);$cycle=FamilyAllowance::cycle($period);
