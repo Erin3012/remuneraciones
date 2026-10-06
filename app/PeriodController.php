@@ -46,6 +46,11 @@ if ($user) {
             $companyId=(int)$selected['company_id'];$role=$selected['role'];
         } else $companyId=(int)$fresh['company_id'];
     }
+    if (isset($_SESSION['portal_role'])) {
+        $centralRole=(string)$_SESSION['portal_role'];
+        $role=in_array($centralRole,['developer','admin'],true)?'admin':'operator';
+        $fresh['global_role']=in_array($centralRole,['developer','admin'],true)?'admin':'none';
+    }
     $user=array_replace($fresh,['company_id'=>$companyId,'role'=>$role]);$_SESSION['user']=$user;
     $monthlyPages=['parameters','parameters-edit','parameter-advanced','period-new','period-save','parameter-save','parameter-advanced-save','parameter-example','periods','period-status','period-close','period-reopen','variables','variables-grid','variables-save','calculate','payslips','payslips-all','payslips-all-pdf','payslip','payslip-pdf','book','book-excel','summary','lre','attendance','attendance-summary','attendance-save','attendance-day-save','attendance-delete'];
     if (in_array($page,$monthlyPages,true)) {

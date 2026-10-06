@@ -9,5 +9,5 @@ try {
     $identity = sso_exchange($code, 'payroll'); require_once __DIR__ . '/../../app/Database.php'; $pdo = Database::connection();
     $stmt = $pdo->prepare('SELECT * FROM users WHERE email=? AND active=1 LIMIT 1'); $stmt->execute([strtolower(trim((string)$identity['email']))]); $local = $stmt->fetch();
     if (!$local) { header('Location: error.php?code=unlinked'); exit; }
-    session_regenerate_id(true); $_SESSION['user'] = $local; header('Location: ../index.php?page=employees'); exit;
+    session_regenerate_id(true); $_SESSION['user'] = $local; $_SESSION['portal_role'] = (string)($identity['role'] ?? 'user'); header('Location: ../index.php?page=employees'); exit;
 } catch (Throwable $e) { error_log($e->getMessage()); header('Location: error.php?code=invalid'); exit; }
