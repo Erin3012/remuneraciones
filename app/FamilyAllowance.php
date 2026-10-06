@@ -27,7 +27,9 @@ final class FamilyAllowance {
         if($band!==null&&$band!=='') {
             if(!in_array($band,['A','B','C','D'],true))return self::pending('Tramo acreditado inválido.');
             $index=array_search($band,['A','B','C','D'],true);
-            return ['ready'=>true,'band'=>$band,'rate'=>$index===3?0:(int)$brackets[$index][1],'source'=>'accredited','average'=>null,'warning'=>'','reference'=>$setting['reference']??''];
+            $reference=(string)($setting['reference']??'');
+            $source=str_starts_with($reference,'Liquidación contable validada:')?'accounting_validated':'accredited';
+            return ['ready'=>true,'band'=>$band,'rate'=>$index===3?0:(int)$brackets[$index][1],'source'=>$source,'average'=>null,'warning'=>'','reference'=>$reference];
         }
         $basis=$setting['income_basis']??'auto';
         if($basis==='auto') {
