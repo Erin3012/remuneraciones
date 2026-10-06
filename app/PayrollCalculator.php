@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/FamilyAllowance.php';
 
 final class PayrollCalculator {
     private static function n(mixed $v): float { return (float)($v ?? 0); }
@@ -37,12 +38,14 @@ final class PayrollCalculator {
         // allowance, while zero explicitly means no allowance. Do not prorate twice.
         $meal = isset($v['meal_allowance_override']) ? self::r(self::n($v['meal_allowance_override'])) : self::r(self::n($e['meal_allowance'])*$days/30);
         $transport = isset($v['transport_allowance_override']) ? self::r(self::n($v['transport_allowance_override'])) : self::r(self::n($e['transport_allowance'])*$days/30);
-        $familyRate=self::n($p['family_allowance']); foreach(($p['family_brackets']??[]) as $bracket){if($taxable<=(float)$bracket[0]){$familyRate=(float)$bracket[1];break;}} $family = (int)($e['family_loads'] ?? 0) * self::r($familyRate); $nonTaxableBonus=self::n($v['non_taxable_bonus'] ?? 0); $viatico=self::n($v['viatico'] ?? 0); $nonTax = $nonTaxableBonus+$viatico+$attendanceLunch+$attendanceSnack;
+        $familyAssessment=$v['family_assessment']??FamilyAllowance::assess($e,(string)($p['period']??date('Y-m')),$p);
+        $family = (int)($e['family_loads'] ?? 0) * (int)$familyAssessment['rate'];
+        $nonTaxableBonus=self::n($v['non_taxable_bonus'] ?? 0); $viatico=self::n($v['viatico'] ?? 0); $nonTax = $nonTaxableBonus+$viatico+$attendanceLunch+$attendanceSnack;
         $patrioticBonusDiscount = self::n($v['patriotic_bonus_discount'] ?? 0);
         $haberes = $taxable+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+$patrioticBonusDiscount+self::n($v['other_discounts']);
         $sis=self::r($afpBase*self::n($p['sis'])); $mutual=self::r($afpBase*self::n($e['mutual_rate'] ?: $p['mutual'])); $scEmployer=self::r($scBase*(($e['contract_type'] ?? '')==='Indefinido'?$p['sc_employer_indefinite']:$p['sc_employer_fixed'])); $sanna=self::r($afpBase*self::n($p['sanna']));
         $reformAfp=self::r($afpBase*self::n($p['reform_afp'])); $reformSsp=self::r($afpBase*self::n($p['reform_ssp']));
-         return compact('days','sb','minimumWageTarget','minimumWageAdjustment','overtimeBase','overtimeHoursDivisor','lic','ot50','ot100','agreedOt','bonus','comm','patrioticBonus','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','patrioticBonusDiscount','nonTaxableBonus','viatico','attendanceLunch','attendanceSnack','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>$minimumWageAdjustment>0?'Ajuste ingreso mínimo aplicado':''];
+         return compact('days','sb','minimumWageTarget','minimumWageAdjustment','overtimeBase','overtimeHoursDivisor','lic','ot50','ot100','agreedOt','bonus','comm','patrioticBonus','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','familyAssessment','patrioticBonusDiscount','nonTaxableBonus','viatico','attendanceLunch','attendanceSnack','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>trim(($minimumWageAdjustment>0?'Ajuste ingreso mínimo aplicado. ':'').$familyAssessment['warning'])];
     }
     private function tax(float $base, array $p): int { foreach (($p['tax_brackets'] ?? []) as $b) if ($base >= $b[0] && $base <= $b[1]) return max(0,self::r($base*$b[2]-$b[3])); return 0; }
 }

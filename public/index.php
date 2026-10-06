@@ -8,6 +8,7 @@ $pdo=Database::connection(); $page=$_GET['page']??'dashboard'; $user=$_SESSION['
 function textUtf8(mixed $v): string{$s=(string)$v;if(function_exists('mb_check_encoding')&&!mb_check_encoding($s,'UTF-8'))$s=mb_convert_encoding($s,'UTF-8','Windows-1252');if(str_contains($s,'Ã')||str_contains($s,'Â')||str_contains($s,'�')){$fixed=@iconv('UTF-8','Windows-1252//IGNORE',$s);if($fixed!==false)$s=(string)@iconv('Windows-1252','UTF-8',$fixed);}return $s;}
 function h(mixed $v): string{return htmlspecialchars(textUtf8($v),ENT_QUOTES,'UTF-8');}
 require_once __DIR__.'/../app/PeriodController.php';
+require_once __DIR__.'/../app/FamilyAllowanceController.php';
 function normalizeRut(string $rut): string{return strtoupper(str_replace(['.','-',' '],'',trim($rut)));}
 function attendanceEmployeeIsActive(array $employee,string $date): bool {return ($employee['status']??'Activo')==='Activo'&&(!$employee['hire_date']||$employee['hire_date']<=$date)&&(!$employee['termination_date']||$employee['termination_date']>=$date);}
 function attendanceDateIsWeekend(string $date): bool {$day=(int)date('N',strtotime($date));return $day>=6;}

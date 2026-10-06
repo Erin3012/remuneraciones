@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/FamilyAllowance.php';
 
 /** Global period publication, locking and immutable company payroll snapshots. */
 final class PayrollPeriods {
@@ -126,11 +127,13 @@ final class PayrollPeriods {
             $id=(int)$r['employee_id'];$allowances[$id]['attendance_lunch']=($allowances[$id]['attendance_lunch']??0)+(int)($r['lunch_amount']??0);
             $allowances[$id]['attendance_snack']=($allowances[$id]['attendance_snack']??0)+(int)($r['snack_amount']??0);
         }
+        $familyContext=FamilyAllowance::context($this->pdo,$companyId,$period);
         $workers=[];$calculator=new PayrollCalculator();$first=$period.'-01';$last=date('Y-m-t',strtotime($first));
         foreach ($employees as $e) {
             if (($e['status']!=='Activo' && !$e['termination_date']) || ($e['hire_date'] && $e['hire_date']>$last) || ($e['termination_date'] && $e['termination_date']<$first)) continue;
             $v=array_replace(array_fill_keys(self::VARIABLE_FIELDS,0),array_fill_keys(self::ALLOWANCE_OVERRIDE_FIELDS,null),$variables[(int)$e['id']]??[],$allowances[(int)$e['id']]??[]);
             $v['calendar_days']=self::calendarDays($e,$period);
+            $v['family_assessment']=FamilyAllowance::assess($e,$period,$params,$familyContext['settings'][(int)$e['id']]??[],$familyContext['history'][(int)$e['id']]??[]);
             $workers[]=['employee'=>$e,'variables'=>$v,'calculation'=>$calculator->calculate($e,$v,$params)];
         }
         $q=$this->pdo->prepare('SELECT * FROM companies WHERE id=?');$q->execute([$companyId]);
@@ -151,6 +154,7 @@ final class PayrollPeriods {
     }
 
     private function storeCalculations(int $periodId,array $workers): void {
+        foreach($workers as $w)if(!($w['calculation']['familyAssessment']['ready']??true))throw new RuntimeException($w['employee']['full_name'].': '.$w['calculation']['familyAssessment']['warning'].' Revisa Asignación familiar en Trabajadores.');
         $q=$this->pdo->prepare('INSERT INTO payslips(period_id,employee_id,calculation_json) VALUES(?,?,?) ON DUPLICATE KEY UPDATE calculation_json=VALUES(calculation_json)');
         foreach ($workers as $w) $q->execute([$periodId,$w['employee']['id'],json_encode($w['calculation'],JSON_THROW_ON_ERROR)]);
         // Remove only stale calculations from open months, preserving IDs of valid payslips.

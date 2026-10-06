@@ -42,4 +42,16 @@ La descarga de liquidaciones usa Dompdf y sus dependencias se incluyen en `vendo
 
 ## Validación legal
 
+### Tramo de asignación familiar
+
+Desde Trabajadores → **Asignación familiar: tramos e ingresos**, selecciona el trabajador y el período. Se usa primero el tramo acreditado A/B/C/D del ciclo julio–junio, con referencia del certificado Caja/IPS. D es un tramo válido sin pago, no un dato faltante. No se importan ni infieren tramos desde liquidaciones externas.
+
+Sin acreditación, se usa enero–junio del año del ciclo; para enero–junio se utiliza el ciclo del año anterior. Obra/faena y plazo fijo hasta seis meses utilizan julio–junio (12 meses). La duración de un plazo fijo debe confirmarse en el formulario, no inferirse desde la fecha de término de la ficha. Los ingresos se promedian entre los meses con ingresos, no entre meses inexistentes. Las liquidaciones guardadas aportan haberes brutos excluyendo asignación familiar; no se recalculan con el sueldo actual. Los antecedentes declarados reemplazan el total del mes para incluir subsidios y otras fuentes, sin duplicar ingresos. Un mes con licencia no se considera completo sin ese complemento. Revisar todas las fuentes de ingreso con la Caja/IPS.
+
+Un mes faltante no es un mes sin ingresos. Si falta información, parámetros o la revisión de casos con menos de 30 días con ingresos históricos, se informa **pendiente** y se bloquean generación de liquidaciones y cierre, en vez de usar el imponible actual. La vista previa puede mostrar asignación 0 con advertencia; no es una liquidación definitiva. Los casos especiales de nuevos beneficiarios con menos de 30 días de ingresos deben resolverse con el tramo acreditado. Las fotografías de períodos cerrados no cambian.
+
+Instalaciones existentes: ejecutar `php tools/migrate_family_allowance.php` antes de utilizar la nueva pantalla. La migración crea únicamente tablas de antecedentes, conserva datos actuales y es reutilizable. No recalcula ni cambia liquidaciones guardadas.
+
+Prueba unitaria: `php tests/FamilyAllowanceTest.php`.
+
 Antes de usar para declaraciones oficiales, validar tasas, tablas SII, formato LRE y resultados con un contador. El CSV LRE se genera con separador `;` y columnas configurables en `app/LreExporter.php`.
