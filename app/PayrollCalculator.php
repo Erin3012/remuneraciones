@@ -19,13 +19,20 @@ final class PayrollCalculator {
         // el sueldo convenido o, si es menor, sobre el ingreso mínimo legal.
         $overtimeBase = max($base, $minimumWage);
         $overtimeHoursDivisor = 180;
+        // Las horas declaradas son el saldo no trabajado tras la revisión semanal.
+        // Se valora el sueldo mensual completo, antes de prorratearlo por días.
+        $absentHours = self::n($v['absent_hours'] ?? 0);
+        if (!is_finite($absentHours) || $absentHours<0) throw new RuntimeException('Las horas faltadas deben ser un número no negativo.');
+        $absentHoursDiscount = self::r($overtimeBase/$overtimeHoursDivisor*$absentHours);
+        $salaryAfterAbsences = $sb+$minimumWageAdjustment-$absentHoursDiscount;
+        if ($salaryAfterAbsences<0) throw new RuntimeException('El descuento por horas faltadas supera el sueldo remunerado del mes. Revisa las horas y los días de licencia o sin goce.');
         $ot50 = self::r($overtimeBase/$overtimeHoursDivisor*1.5*self::n($v['overtime_50'] ?? 0));
         $ot100 = self::r($overtimeBase/$overtimeHoursDivisor*2*self::n($v['overtime_100'] ?? 0));
         $agreedOt = self::r(self::n($v['agreed_overtime_hours'] ?? 0)*self::n($v['agreed_overtime_value'] ?? 0));
         $bonus = self::n($v['taxable_bonus'] ?? 0); $comm = self::n($v['commissions'] ?? 0); $patrioticBonus = self::n($v['patriotic_bonus'] ?? 0);
         $attendanceLunch = (int)round(self::n($v['attendance_lunch'] ?? 0)); $attendanceSnack = (int)round(self::n($v['attendance_snack'] ?? 0));
-        $grat = ($e['gratification_type'] ?? 'Art.50') === 'Garantizada' ? self::n($v['guaranteed_gratification'] ?? 0) : min(self::r(($sb+$minimumWageAdjustment+$ot50+$ot100+$bonus+$comm)*.25), self::r($minimumWage*4.75/12));
-        $taxable = $sb+$minimumWageAdjustment+$ot50+$ot100+$agreedOt+$bonus+$comm+$patrioticBonus+$grat;
+        $grat = ($e['gratification_type'] ?? 'Art.50') === 'Garantizada' ? self::n($v['guaranteed_gratification'] ?? 0) : min(self::r(($salaryAfterAbsences+$ot50+$ot100+$bonus+$comm)*.25), self::r($minimumWage*4.75/12));
+        $taxable = $salaryAfterAbsences+$ot50+$ot100+$agreedOt+$bonus+$comm+$patrioticBonus+$grat;
         $afpCap = self::r(self::n($p['afp_cap_uf'])*self::n($p['uf'])); $scCap = self::r(self::n($p['unemployment_cap_uf'])*self::n($p['uf']));
         $afpBase = min($taxable,$afpCap); $scBase = min($taxable,$scCap);
         $afpRate = self::n($p['afp_rates'][$e['afp']] ?? 0); $afp = ($e['contributes_afp'] ?? 1) ? self::r($afpBase*$afpRate) : 0;
@@ -45,7 +52,7 @@ final class PayrollCalculator {
         $haberes = $taxable+$meal+$transport+$family+$nonTax; $discounts = $afp+$health+$scWorker+$iusc+self::n($v['advance'])+self::n($v['company_loan'])+self::n($v['ccaf_loan'])+$patrioticBonusDiscount+self::n($v['other_discounts']);
         $sis=self::r($afpBase*self::n($p['sis'])); $mutual=self::r($afpBase*self::n($e['mutual_rate'] ?: $p['mutual'])); $scEmployer=self::r($scBase*(($e['contract_type'] ?? '')==='Indefinido'?$p['sc_employer_indefinite']:$p['sc_employer_fixed'])); $sanna=self::r($afpBase*self::n($p['sanna']));
         $reformAfp=self::r($afpBase*self::n($p['reform_afp'])); $reformSsp=self::r($afpBase*self::n($p['reform_ssp']));
-         return compact('days','sb','minimumWageTarget','minimumWageAdjustment','overtimeBase','overtimeHoursDivisor','lic','ot50','ot100','agreedOt','bonus','comm','patrioticBonus','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','familyAssessment','patrioticBonusDiscount','nonTaxableBonus','viatico','attendanceLunch','attendanceSnack','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>trim(($minimumWageAdjustment>0?'Ajuste ingreso mínimo aplicado. ':'').$familyAssessment['warning'])];
+         return compact('days','sb','minimumWageTarget','minimumWageAdjustment','overtimeBase','overtimeHoursDivisor','absentHours','absentHoursDiscount','salaryAfterAbsences','lic','ot50','ot100','agreedOt','bonus','comm','patrioticBonus','grat','taxable','afpCap','scCap','afpBase','scBase','afp','health','additional','scWorker','iusc','meal','transport','family','familyAssessment','patrioticBonusDiscount','nonTaxableBonus','viatico','attendanceLunch','attendanceSnack','nonTax','haberes','discounts','sis','mutual','scEmployer','sanna','reformAfp','reformSsp') + ['advance'=>self::n($v['advance']??0),'company_loan'=>self::n($v['company_loan']??0),'ccaf_loan'=>self::n($v['ccaf_loan']??0),'other_discounts'=>self::n($v['other_discounts']??0),'net'=>max(0,$haberes-$discounts),'employer_total'=>$sis+$mutual+$scEmployer+$sanna+$reformAfp+$reformSsp,'warning'=>trim(($minimumWageAdjustment>0?'Ajuste ingreso mínimo aplicado. ':'').$familyAssessment['warning'])];
     }
     private function tax(float $base, array $p): int { foreach (($p['tax_brackets'] ?? []) as $b) if ($base >= $b[0] && $base <= $b[1]) return max(0,self::r($base*$b[2]-$b[3])); return 0; }
 }

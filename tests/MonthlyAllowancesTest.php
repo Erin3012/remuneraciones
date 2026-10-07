@@ -11,7 +11,7 @@ allowanceCheck($over['meal']===80000 && $over['transport']===0,'Override must no
 foreach(['days','sb','taxable','afp','health','iusc','discounts'] as $key)allowanceCheck($over[$key]===$baseline[$key],'Unrelated calculation changed: '.$key);
 allowanceCheck(abs(($over['haberes']-$baseline['haberes'])-(80000-$baseline['meal']-$baseline['transport']))<0.01,'Totals do not include override exactly once');
 allowanceCheck($calculator->calculate($e,$v,$p)===$baseline,'Override leaked into another calculation');
-allowanceCheck($calculator->calculate($e,$v+['absent_hours'=>10.5],$p)===$baseline,'Recording absent hours must not change payroll until the discount method is defined');
+allowanceCheck($calculator->calculate($e,$v+['absent_hours'=>0],$p)===$baseline,'Zero absent hours must preserve payroll');
 allowanceCheck(PayrollPeriods::absentHours('10.5')===10.5,'Fractional absent hours must be retained');
 allowanceCheck(PayrollPeriods::absentHours('0')===0.0,'Zero absent hours must be accepted');
 foreach(['-0.01','744.01','abc',[],INF] as $value){$blocked=false;try{PayrollPeriods::absentHours($value);}catch(RuntimeException){$blocked=true;}allowanceCheck($blocked,'Invalid absent hours accepted');}

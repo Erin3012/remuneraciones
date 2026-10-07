@@ -42,6 +42,10 @@ La descarga de liquidaciones usa Dompdf y sus dependencias se incluyen en `vendo
 
 ## Validación legal
 
+### Horas faltadas
+
+En Variables y cálculos se registra el saldo de horas no trabajadas después de compensar los excesos dentro de cada semana. Para la jornada de 42 horas semanales que utiliza el cálculo actual, el descuento es el sueldo mensual completo (incluido el ajuste al mínimo del período) dividido por 180, multiplicado por las horas y redondeado a pesos enteros. Los días trabajados se conservan. El descuento se presenta como haber negativo y reduce la base del artículo 50 y las bases imponibles; no vuelve a restarse en otros descuentos. La gratificación garantizada conserva el monto declarado. La revisión de jornadas distintas requiere adaptar el divisor al contrato. Prueba: `php tests/AbsentHoursTest.php`.
+
 ### Tramo de asignación familiar
 
 Desde Trabajadores → **Asignación familiar: tramos e ingresos**, selecciona el trabajador y el período. Se usa primero el tramo acreditado A/B/C/D del ciclo julio–junio, con referencia del certificado Caja/IPS. D es un tramo válido sin pago, no un dato faltante. No se importan ni infieren tramos desde liquidaciones externas.
