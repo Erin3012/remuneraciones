@@ -145,6 +145,7 @@ if ($user) {
                             $value=$_POST[$key][$id]??($allowed[$id][$key]??null);
                             $values[]=PayrollPeriods::allowanceOverride($value);continue;
                         }
+                        if ($key==='absent_hours') {$values[]=PayrollPeriods::absentHours($_POST[$key][$id]??0);continue;}
                         $value=$_POST[$key][$id]??0;if (!is_numeric($value)) throw new RuntimeException('Ingresa un valor numérico válido.');$values[]=(int)round((float)$value);
                     }
                     $save->execute($values);

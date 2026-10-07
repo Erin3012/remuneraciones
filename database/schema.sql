@@ -97,6 +97,7 @@ CREATE TABLE payroll_variables (
   employee_id BIGINT UNSIGNED NOT NULL,
   medical_leave_days INT NOT NULL DEFAULT 0,
   unpaid_leave_days INT NOT NULL DEFAULT 0,
+  absent_hours DECIMAL(10,2) NOT NULL DEFAULT 0,
   overtime_50 DECIMAL(10,2) NOT NULL DEFAULT 0,
   overtime_100 DECIMAL(10,2) NOT NULL DEFAULT 0,
   agreed_overtime_hours DECIMAL(10,2) NOT NULL DEFAULT 0,
