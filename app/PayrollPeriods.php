@@ -135,10 +135,15 @@ final class PayrollPeriods {
             $allowances[$id]['attendance_snack']=($allowances[$id]['attendance_snack']??0)+(int)($r['snack_amount']??0);
         }
         $familyContext=FamilyAllowance::context($this->pdo,$companyId,$period);
+        $scheduledLoanQuery=null;
+        if ($this->tableExists('company_loan_installments') && $this->tableExists('company_loans')) $scheduledLoanQuery=$this->pdo->prepare("SELECT COALESCE(SUM(i.amount),0) FROM company_loan_installments i JOIN company_loans l ON l.id=i.loan_id WHERE i.employee_id=? AND i.due_period=? AND l.company_id=? AND (i.status='paid' OR (i.status='pending' AND l.status='active'))");
         $workers=[];$calculator=new PayrollCalculator();$first=$period.'-01';$last=date('Y-m-t',strtotime($first));
         foreach ($employees as $e) {
             if (($e['status']!=='Activo' && !$e['termination_date']) || ($e['hire_date'] && $e['hire_date']>$last) || ($e['termination_date'] && $e['termination_date']<$first)) continue;
             $v=array_replace(array_fill_keys(self::VARIABLE_FIELDS,0),array_fill_keys(self::ALLOWANCE_OVERRIDE_FIELDS,null),$variables[(int)$e['id']]??[],$allowances[(int)$e['id']]??[]);
+            $v['loan_period']=$period;
+            $v['company_loan_installment']=0;
+            if ($scheduledLoanQuery) {$scheduledLoanQuery->execute([(int)$e['id'],$period,$companyId]);$v['company_loan_installment']=(int)$scheduledLoanQuery->fetchColumn();}
             $v['calendar_days']=self::calendarDays($e,$period);
             $v['family_assessment']=FamilyAllowance::assess($e,$period,$params,$familyContext['settings'][(int)$e['id']]??[],$familyContext['history'][(int)$e['id']]??[]);
             $workers[]=['employee'=>$e,'variables'=>$v,'calculation'=>$calculator->calculate($e,$v,$params)];
@@ -164,6 +169,11 @@ final class PayrollPeriods {
         foreach($workers as $w)if(!($w['calculation']['familyAssessment']['ready']??true))throw new RuntimeException($w['employee']['full_name'].': '.$w['calculation']['familyAssessment']['warning'].' Revisa Asignación familiar en Trabajadores.');
         $q=$this->pdo->prepare('INSERT INTO payslips(period_id,employee_id,calculation_json) VALUES(?,?,?) ON DUPLICATE KEY UPDATE calculation_json=VALUES(calculation_json)');
         foreach ($workers as $w) $q->execute([$periodId,$w['employee']['id'],json_encode($w['calculation'],JSON_THROW_ON_ERROR)]);
+        if ($this->tableExists('company_loan_installments') && $this->tableExists('company_loans')) {
+            $paid=$this->pdo->prepare("UPDATE company_loan_installments SET status='paid',payroll_period_id=?,paid_at=CURRENT_TIMESTAMP WHERE employee_id=? AND due_period=? AND status='pending'");
+            foreach ($workers as $w) if ((int)($w['variables']['company_loan_installment']??0)>0) $paid->execute([$periodId,(int)$w['employee']['id'],(string)($w['variables']['loan_period']??'')]);
+            $this->pdo->prepare("UPDATE company_loans l SET status='completed' WHERE l.status='active' AND NOT EXISTS (SELECT 1 FROM company_loan_installments i WHERE i.loan_id=l.id AND i.status='pending') AND EXISTS (SELECT 1 FROM company_loan_installments i WHERE i.loan_id=l.id AND i.status='paid')")->execute();
+        }
         // Remove only stale calculations from open months, preserving IDs of valid payslips.
         $ids=array_column(array_column($workers,'employee'),'id');
         $sql='DELETE FROM payslips WHERE period_id=?';$args=[$periodId];

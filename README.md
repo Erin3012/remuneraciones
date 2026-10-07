@@ -59,3 +59,6 @@ Instalaciones existentes: ejecutar `php tools/migrate_family_allowance.php` ante
 Prueba unitaria: `php tests/FamilyAllowanceTest.php`.
 
 Antes de usar para declaraciones oficiales, validar tasas, tablas SII, formato LRE y resultados con un contador. El CSV LRE se genera con separador `;` y columnas configurables en `app/LreExporter.php`.
+## Préstamos de empresa
+
+El módulo `Préstamos empresa` registra un préstamo por trabajador, el período de inicio y un plan definido por número de cuotas o monto mensual. Cada cuota se descuenta automáticamente al calcular su período y queda marcada como descontada; la pantalla muestra el historial y saldo pendiente. El campo `Prést. empresa manual` de Variables y cálculos sigue disponible para descuentos puntuales. Para instalar el módulo en una base existente, ejecutar `database/migration_company_loans.sql` una sola vez.

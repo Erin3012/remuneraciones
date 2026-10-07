@@ -52,7 +52,7 @@ if ($user) {
         $fresh['global_role']=in_array($centralRole,['developer','admin'],true)?'admin':'none';
     }
     $user=array_replace($fresh,['company_id'=>$companyId,'role'=>$role]);$_SESSION['user']=$user;
-    $monthlyPages=['parameters','parameters-edit','parameter-advanced','period-new','period-save','parameter-save','parameter-advanced-save','parameter-example','periods','period-status','period-close','period-reopen','variables','variables-grid','variables-save','calculate','payslips','payslips-all','payslips-all-pdf','payslip','payslip-pdf','book','book-excel','summary','lre','attendance','attendance-summary','attendance-save','attendance-day-save','attendance-delete'];
+    $monthlyPages=['parameters','parameters-edit','parameter-advanced','period-new','period-save','parameter-save','parameter-advanced-save','parameter-example','periods','period-status','period-close','period-reopen','variables','variables-grid','variables-save','calculate','payslips','payslips-all','payslips-all-pdf','payslip','payslip-pdf','book','book-excel','summary','lre','attendance','attendance-summary','attendance-save','attendance-day-save','attendance-delete','loans','loan-create','loan-cancel'];
     if (in_array($page,$monthlyPages,true)) {
         try {$periodService->assertReady();} catch (Throwable $e) {periodError($e,503);}
     }

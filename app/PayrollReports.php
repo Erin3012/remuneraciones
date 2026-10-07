@@ -14,6 +14,7 @@ function payrollBookRows(array $data,bool $lre=false): array {
         $contract=$e['contract_type']==='Indefinido'?'1':($e['contract_type']==='Plazo Fijo'?'2':'3');
         $prev=$r['afp']+$r['health']+$r['scWorker']+($lre?0:$r['additional']);
         $row=[str_replace('.','',$e['rut']),$e['full_name'],$date,$contract,$r['days'],$v['medical_leave_days']??0,$v['unpaid_leave_days']??0,$e['base_salary'],$r['sb'],$r['minimumWageAdjustment']??0,$r['ot50']+$r['ot100'],$r['bonus'],$r['comm'],$r['grat'],$r['patrioticBonus']??0,0,$r['taxable'],$e['afp'],$r['afp'],$e['health_institution'],$r['health'],$r['additional'],$r['scWorker'],$prev,$r['iusc'],$r['family'],$r['transport'],$r['meal'],$r['nonTaxableBonus']??0,$r['viatico']??0,($r['attendanceLunch']??0)+($r['attendanceSnack']??0),$r['haberes'],$v['advance']??0,$r['patrioticBonusDiscount']??0,$v['company_loan']??0,$v['ccaf_loan']??0,$v['other_discounts']??0,$r['discounts'],$r['net'],$r['sis'],$r['mutual'],$r['scEmployer'],$r['employer_total'],$r['haberes']+$r['employer_total'],$e['commune']??'',$e['region']??'',$r['sanna']];
+        $row[34]=$r['company_loan']??($row[34]??0);
         if (!$lre) {$row[]=$r['absentHours']??0;$row[]=$r['absentHoursDiscount']??0;} $rows[]=$row;
     }
     return $rows;
