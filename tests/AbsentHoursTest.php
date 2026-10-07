@@ -31,6 +31,8 @@ $source=(string)file_get_contents(__DIR__.'/../public/index.php');$offset=strpos
 if($offset===false)throw new RuntimeException('Payslip functions not found');eval(substr($source,$offset));
 $html=payslipHtml($e,$r,'2026-09','Empresa de prueba');
 absenceCheck(str_contains($html,'Dcto. horas faltadas (10,5 h)')&&str_contains($html,'-$32.291'),'Payslip must show fractional hours and the negative earning');
+absenceCheck(companyLoanLabel([['installment_number'=>4,'installment_count'=>12,'amount'=>50000]],50000)==='Préstamo empresa (4/12)','Scheduled loan should show the current installment number');
+absenceCheck(companyLoanLabel([],50000)==='Préstamo empresa','Manual company-loan discounts must not be mislabeled as total installments');
 absenceCheck(!str_contains(payslipHtml($e,$before,'2026-09','Empresa de prueba'),'Dcto. horas faltadas'),'Zero-hour payslip gained an empty row');
 foreach([$html,'<div class="batch-payslip">'.$html.'</div><div class="batch-payslip">'.$html.'</div>'] as $document){$pdf=PayslipPdf::renderHtml($document,(string)file_get_contents(__DIR__.'/../public/style.css'));absenceCheck(str_starts_with($pdf,'%PDF-'),'Individual/batch PDF generation failed');}
 echo "Absent-hours calculation, book, payslip and PDF tests passed\n";

@@ -6,6 +6,27 @@ function payrollBookHeaders(bool $excel=false): array {
     return array_merge(['RUT','Nombre completo','Fecha ingreso','Tipo contrato','Días trab.','Días lic. méd.','Días lic. s/goce','Sueldo base','SB proporcional','Ajuste ley sueldo base','HH.EE. $','Bono imponible','Comisiones','Gratificación','Aguinaldo Fiestas Patrias','Otros hab. imp.','TOTAL IMPONIBLE','AFP','AFP $','Salud','Salud $','Adic. Isapre $','AFC trab. $','TOTAL PREV.','Imp. único $','Asig. familiar','Movilización','Colación','Aguinaldo','Viático','Otros no imp.','TOTAL HABERES','Anticipo','Descto. aguinaldo','Prést. empresa','Prést. CCAF','Otros descuentos','TOTAL DESCTOS.','LÍQUIDO A PAGAR','Ap. SIS','Ap. Mutual $','AFC emp. $','TOTAL AP. EMP.','COSTO TOTAL EMP.','Comuna','Región','Ap. SANNA $'],['HH faltadas','Dcto. HH faltadas $']);
 }
 
+function companyLoanLabel(array $installments,float $total): string {
+    $parts=[];$scheduled=0;
+    foreach($installments as $installment) {
+        $number=(int)($installment['installment_number']??0);$count=(int)($installment['installment_count']??0);$amount=(int)($installment['amount']??0);
+        if($number>0&&$count>0){$parts[]=$number.'/'.$count;$scheduled+=$amount;}
+    }
+    if(!$parts)return 'Préstamo empresa';
+    $label='Préstamo empresa ('.implode(' + ',$parts);
+    if((int)round($total)>$scheduled)$label.=' + manual';
+    return $label.')';
+}
+
+function companyLoanPayslipLabel(PDO $pdo,int $employeeId,string $period,float $total): string {
+    if(abs($total)<0.00001)return 'Préstamo empresa';
+    $exists=$pdo->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='company_loan_installments'")->fetchColumn();
+    if(!(int)$exists)return 'Préstamo empresa';
+    $q=$pdo->prepare("SELECT i.installment_number,i.amount,l.installment_count FROM company_loan_installments i JOIN company_loans l ON l.id=i.loan_id WHERE i.employee_id=? AND i.due_period=? AND i.status IN ('paid','pending') AND l.status<>'cancelled' ORDER BY i.installment_number");
+    $q->execute([$employeeId,$period]);
+    return companyLoanLabel($q->fetchAll(PDO::FETCH_ASSOC),$total);
+}
+
 function payrollBookRows(array $data,bool $lre=false): array {
     $rows=[];
     foreach ($data['workers'] as $w) {
@@ -31,12 +52,14 @@ if ($user && in_array($page,['calculate','payslips','payslip','payslip-pdf','pay
         if (in_array($page,['payslip','payslip-pdf'],true)) {
             $selected=null;foreach ($data['workers'] as $w) if ((int)$w['employee']['id']===(int)($_GET['employee']??0)) $selected=$w;
             if (!$selected) throw new RuntimeException('No existe una liquidación de este trabajador en el período.');
+            $GLOBALS['activeCompanyLoanLabel']=companyLoanPayslipLabel($pdo,(int)$selected['employee']['id'],$period,(float)($selected['calculation']['company_loan']??0));
             $html=payslipHtml($selected['employee'],$selected['calculation'],$period,$companyName);
+            unset($GLOBALS['activeCompanyLoanLabel']);
             if ($page==='payslip-pdf') PayslipPdf::download($html,$period.'_'.$selected['employee']['full_name'].'.pdf',(string)file_get_contents(__DIR__.'/../public/style.css'));
             layout('Liquidación',$html.'<div class="payslip-actions"><a class="button" href="?page=payslip-pdf&period='.h($period).'&employee='.(int)$selected['employee']['id'].'">Descargar PDF</a></div>');exit;
         }
         if (in_array($page,['payslips-all','payslips-all-pdf'],true)) {
-            $html='';foreach ($data['workers'] as $w) $html.='<div class="batch-payslip">'.payslipHtml($w['employee'],$w['calculation'],$period,$companyName).'</div>';
+            $html='';foreach ($data['workers'] as $w) {$GLOBALS['activeCompanyLoanLabel']=companyLoanPayslipLabel($pdo,(int)$w['employee']['id'],$period,(float)($w['calculation']['company_loan']??0));$html.='<div class="batch-payslip">'.payslipHtml($w['employee'],$w['calculation'],$period,$companyName).'</div>';unset($GLOBALS['activeCompanyLoanLabel']);}
             PayslipPdf::download($html,$period.'_liquidaciones.pdf',(string)file_get_contents(__DIR__.'/../public/style.css'));
         }
         if (in_array($page,['payslips','calculate'],true)) {
