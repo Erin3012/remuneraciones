@@ -11,6 +11,7 @@ deployment:
     - /bin/cp tools/migrate_global_periods.php $DEPLOYPATH/tools/
     - /bin/cp tools/migrate_monthly_allowances.php $DEPLOYPATH/tools/
     - /bin/cp tools/migrate_family_allowance.php $DEPLOYPATH/tools/
+    - /bin/cp tools/migrate_company_loans.php $DEPLOYPATH/tools/
     - /bin/cp database/migration_patriotic_bonus.sql $DEPLOYPATH/database/
     - /bin/cp README.md $DEPLOYPATH
     - /bin/cp composer.json $DEPLOYPATH
